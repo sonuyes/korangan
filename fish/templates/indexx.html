@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App with Image Upload</title>
+    <style>
+        /* Resetting common styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4f4f4;
+            font-size: 14px; /* Ensure consistent font size */
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-bubble {
+            max-width: 70%; /* Restrict the width of bubbles */
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 15px;
+            background-color: #007bff;
+            color: white;
+            align-self: center;
+            word-wrap: break-word;
+            font-size: 14px; /* Fixed font size */
+        }
+
+        .chat-bubble img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .chat-input-container {
+            display: flex;
+            border-top: 1px solid #ccc;
+            padding: 10px;
+            background-color: #fff;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px; /* Make sure input has consistent font size */
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .file-input {
+            margin-left: 10px;
+        }
+
+        .send-button {
+            padding: 10px 20px;
+            font-size: 14px; /* Ensure consistent button size */
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .send-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container" id="chat-container">
+        <!-- Chat messages will appear here -->
+    </div>
+
+    <!-- Form for CSRF token, email, and image upload -->
+    <form id="chat-form" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="chat-input-container">
+            <input type="text" id="id_email" name="email" class="chat-input" placeholder="Enter your email">
+            <input type="file" id="id_image" name="image" class="file-input" accept="image/*">
+            <button type="submit" class="send-button">Send</button>
+        </div>
+    </form>
+
+    <script
+        src="https://code.jquery.com/jquery-3.5.0.min.js"
+        integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ="
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+<script>
+    const form = document.getElementById('chat-form');
+
+form.addEventListener("submit", submitHandler);
+
+function submitHandler(e) {
+    e.preventDefault();
+
+    // Use FormData to include file inputs
+    const formData = new FormData(form);
+
+    $.ajax({
+        type: 'POST', // HTTP verb
+        url: '{% url "home" %}', // Django URL name
+        data: formData, // Pass FormData object
+        processData: false,  // Prevent jQuery from converting FormData
+        contentType: false,  // Ensure the correct Content-Type header
+        success: successFunction,
+        error: function (xhr, status, error) {
+            console.error("Error:", xhr.responseText);
+        }
+    });
+}
+
+
+    function successFunction(msg) {
+       // document.getElementById('fs').innerHTML=msg.message
+        if (msg.message === "success") {
+            form.reset()
+        }
+    
+    }
+// Fetch the data and update the page
+function fetchData() {
+  const xhr = new XMLHttpRequest();
+  xhr.open("GET", "kal", true); // "true" for asynchronous
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      const asl = xhr.responseText;
+      document.getElementById("chat-container").innerHTML = asl;
+    }
+  };
+
+  xhr.send();
+}
+
+// Event listener for page load
+window.addEventListener('load', fetchData);
+function getHTML() {
+
+const xhp = new XMLHttpRequest();
+
+xhp.onload = function() {
+
+  if (xhp.status === 200) {
+
+    ad=xhp.responseText;
+  } else {
+
+    console.error("Error fetching HTML:", xhp.statusText);
+
+  }
+
+};
+
+xhp.open("GET","check" , true); // 'true' for asynchronous request
+
+xhp.send();
+
+}
+window.addEventListener('load', getHTML);
+// Function to fetch the last part of the response and append it
+function fetchLastPart() {
+  const xhr = new XMLHttpRequest();
+  xhr.open("GET", "kal", true);
+
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      const responseHTML = xhr.responseText;
+      const parts = responseHTML.split("<!--h-->");
+
+      // Access the last part
+      const lastPart = parts[parts.length - 2]; // Second-to-last part
+
+      if (lastPart) {
+        document.getElementById("chat-container").innerHTML += lastPart;
+      } else {
+        console.log("No valid last part found.");
+      }
+    }
+  };
+
+  xhr.onerror = function () {
+    console.error("An error occurred while fetching data.");
+  };
+
+  xhr.send();
+}
+
+// Function to check if the data has changed
+function checkForChanges() {
+
+
+const xhp = new XMLHttpRequest();
+
+xhp.onload = function() {
+
+  if (xhp.status === 200) {
+
+    if (ad != xhp.responseText){
+      fetchLastPart()
+      ad=xhp.responseText
+    }
+
+  } else {
+
+    console.error("Error fetching HTML:", xhp.statusText);
+
+  }
+
+};
+
+xhp.open("GET","check" , true); // 'true' for asynchronous request
+
+xhp.send();
+
+}
+
+
+// Periodically check for changes every 1 second
+setInterval(checkForChanges, 1000);
+
+</script>
+</body>
+</html>
